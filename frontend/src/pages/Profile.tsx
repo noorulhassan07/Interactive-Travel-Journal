@@ -13,6 +13,7 @@ interface UserProfile {
   badges: number;
   favoritePlaces: string[];
   address: string;
+  image?: string;
 }
 
 // Dummy profiles
@@ -25,6 +26,7 @@ const DUMMY_PROFILES: Record<string, UserProfile> = {
     badges: 3,
     favoritePlaces: ['Paris', 'Tokyo', 'New York'],
     address: '123 Main St, Los Angeles, USA',
+    image:'C:/Users/nooru/OneDrive/Desktop/Interactive Travel Journal/frontend/src/assests/images/adam.jpg',
   },
   'eve@gmail.com': {
     fullName: 'Eve Johnson',
@@ -34,6 +36,7 @@ const DUMMY_PROFILES: Record<string, UserProfile> = {
     badges: 2,
     favoritePlaces: ['London', 'Rome', 'Barcelona'],
     address: '45 Park Lane, London, UK',
+    image:'C:/Users/nooru/OneDrive/Desktop/Interactive Travel Journal/frontend/src/assests/images/eve.jpg',
   },
   'john@gmail.com': {
     fullName: 'John Doe',
@@ -43,6 +46,7 @@ const DUMMY_PROFILES: Record<string, UserProfile> = {
     badges: 5,
     favoritePlaces: ['Berlin', 'Amsterdam'],
     address: '89 Oak St, Berlin, Germany',
+    image:'frontend/src/assests/images/joe.jpg',
   },
   'alice@gmail.com': {
     fullName: 'Alice Brown',
@@ -52,6 +56,7 @@ const DUMMY_PROFILES: Record<string, UserProfile> = {
     badges: 1,
     favoritePlaces: ['Nice', 'Lyon'],
     address: '77 Rue de la Paix, Lyon, France',
+    image:'C:/Users/nooru/OneDrive/Desktop/Interactive Travel Journal/frontend/src/assests/images/alice.jpeg',
   },
 };
 
@@ -110,6 +115,15 @@ const Profile = () => {
             </div>
           </div>
         </div>
+        {profile.image && (
+            <div className='w-32 h-32 md:w-40 md:h-40 flex-shrink-0'>
+                <img
+                src={profile.image}
+                alt={`${profile.fullName}avatar`}
+                className = "w-full h-full object-cover rounded-full shadow-lg"
+                />
+            </div>
+            )}
       </motion.div>
     </Layout>
   );
