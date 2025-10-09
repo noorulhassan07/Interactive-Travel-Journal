@@ -9,6 +9,7 @@ import Wishlist from './pages/Wishlist';
 import Badges from './pages/Badges'; 
 import Friends from './pages/Friends';
 import Profile from './pages/Profile';
+import Globe from './pages/Globe';
 
 function App() {
   return (
@@ -23,6 +24,15 @@ function App() {
             element={
               <PrivateRoute>
                 <Dashboard />
+              </PrivateRoute>
+            }
+          />
+
+           <Route
+            path="/globe"
+            element={
+              <PrivateRoute>
+                <Globe />
               </PrivateRoute>
             }
           />
