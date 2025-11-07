@@ -1,40 +1,25 @@
-## interactive travel journal / backend/app/schemas/trip_schema.py
-
-from pydantic import BaseModel, Field
-from typing import Optional
+# backend/app/schemas/trip_schema.py
+from pydantic import BaseModel
+from typing import Optional, List
 from datetime import datetime
 
-class TripBase(BaseModel):
-    title: str = Field(..., min_length=3, max_length=100)
-    description: Optional[str] = Field(None, max_length=1000)
-    start_date: datetime
-    end_date: datetime
-    location: Optional[str] = Field(None, max_length=255)
-    is_public: bool = True
-    photos: Optional[list[str]] = []
-    tags: Optional[list[str]] = []
+class TripCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    location: Optional[str] = None
 
-class TripCreate(TripBase):
-    user_id: str
-
-class TripResponse(TripBase):
-    id: int
-    user_id: str
+class TripOut(BaseModel):
+    id: str
+    title: str
+    description: Optional[str]
+    owner_id: Optional[str]
+    start_date: Optional[datetime]
+    end_date: Optional[datetime]
+    location: Optional[str]
     created_at: datetime
-    updated_at: datetime
+    media_ids: List[str] = []
 
     class Config:
         orm_mode = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
-
-class TripUpdate(BaseModel):
-    title: Optional[str] = Field(None, min_length=3, max_length=100)
-    description: Optional[str] = Field(None, max_length=1000)
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    location: Optional[str] = Field(None, max_length=255)
-    is_public: Optional[bool] = None
-    photos: Optional[list[str]] = []
-    tags: Optional[list[str]] = []
