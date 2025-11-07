@@ -1,27 +1,16 @@
-##interactive travel journal / backend/app/schemas/media_schema.py
+# backend/app/schemas/media_schema.py
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-class MediaBase(BaseModel):
+class MediaOut(BaseModel):
+    id: str
     filename: str
-    url: str
-    media_type: str  # e.g., 'image', 'video'
-    trip_id: Optional[int] = None
-    user_id: Optional[int] = None
-    file_path: Optional[str] = None
-    uploaded_at: Optional[datetime] = datetime.utcnow()
-
-class MediaCreate(MediaBase):
-    pass
-
-class MediaResponse(MediaBase):
-    id: int
-    created_at: datetime
-    updated_at: datetime
+    content_type: Optional[str]
+    url: Optional[str]
+    owner_id: Optional[str]
+    uploaded_at: datetime
+    description: Optional[str]
 
     class Config:
         orm_mode = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
