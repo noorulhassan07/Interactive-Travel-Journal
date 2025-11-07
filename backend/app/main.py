@@ -1,45 +1,36 @@
 # backend/app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.config import init_db
+from app.db import init_db
+from app.routes import auth_routes, user_routes, trip_routes, media_routes
+import os
 
-# Import route modules
-from app.routes.auth_routes import router as auth_router
-from app.routes.trip_routes import router as trip_router
-from app.routes.media_routes import router as media_router
-from app.routes.user_routes import router as user_router
+def create_app() -> FastAPI:
+    app = FastAPI(title="Interactive Travel Journal - Backend")
 
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # tighten in production
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-app = FastAPI(
-    title="Interactive Travel Journal API",
-    description="Backend API for Interactive Travel Journal project.",
-    version="1.0.0"
-)
+    @app.on_event("startup")
+    async def startup():
+        mongo_url = os.getenv("MONGODB_URL")
+        await init_db(mongo_url)
 
-# CORS setup for frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # later, restrict to frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    # include routers
+    app.include_router(auth_routes.router, prefix="/api/auth", tags=["auth"])
+    app.include_router(user_routes.router, prefix="/api/users", tags=["users"])
+    app.include_router(trip_routes.router, prefix="/api/trips", tags=["trips"])
+    app.include_router(media_routes.router, prefix="/api/media", tags=["media"])
 
+    @app.get("/api/health")
+    async def health():
+        return {"status": "ok"}
 
-# Include all route files
-app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
-app.include_router(user_router, prefix="/users", tags=["Users"])
-app.include_router(trip_router, prefix="/trips", tags=["Trips"])
-app.include_router(media_router, prefix="/media", tags=["Media"])
+    return app
 
-
-# Startup event: initialize database
-@app.on_event("startup")
-async def start_db():
-    await init_db()
-
-
-# Root endpoint
-@app.get("/", tags=["Root"])
-async def root():
-    return {"message": "🚀 Interactive Travel Journal Backend is running!"}
+app = create_app()
