@@ -17,7 +17,6 @@ async def save_media(file: UploadFile, user_id: str = None, trip_id: str = None)
 
     user = await User.get(PydanticObjectId(user_id)) if user_id else None
     trip = await Trip.get(PydanticObjectId(trip_id)) if trip_id else None
-
     media = Media(
         filename=file.filename,
         file_type=file.content_type,
