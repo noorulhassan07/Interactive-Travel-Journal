@@ -1,13 +1,20 @@
-FROM python:3.11-slim
+# Use lightweight Python base image
+FROM python:3.12-slim
 
+# Set work directory
 WORKDIR /app
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
 
-COPY requirements.txt .
+# Copy requirements first for caching
+COPY requirements.txt /app/requirements.txt
+
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./app /app/app
-COPY .env /app/.env
+# Copy backend code
+COPY . /app
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Expose backend port
+EXPOSE 8000
+
+# Run FastAPI server
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
