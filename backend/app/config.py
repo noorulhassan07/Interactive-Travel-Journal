@@ -1,29 +1,10 @@
 # backend/app/config.py
 import os
-from beanie import init_beanie
-from motor.motor_asyncio import AsyncIOMotorClient
-from dotenv import load_dotenv
+from pydantic import BaseSettings
 
-from app.models.user_model import User
-from app.models.trip_model import Trip
-from app.models.media_model import Media
-from app.models.token_model import Token
+class Settings(BaseSettings):
+    MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://root:example@mongo:27017/travel_journal_db?authSource=admin")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "replace_this_with_a_secure_random_value")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
-
-# Load environment variables from .env file
-load_dotenv()
-
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017/travel_journal_db")
-
-
-async def init_db():
-    """
-    Initialize the MongoDB connection and register all models.
-    """
-    client = AsyncIOMotorClient(MONGODB_URL)
-    db = client.get_default_database()
-
-    await init_beanie(
-        database=db,
-        document_models=[User, Trip, Media, Token]
-    )
+settings = Settings()
