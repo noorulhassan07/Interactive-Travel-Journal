@@ -1,36 +1,108 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface User {
+  username: string;
   email: string;
   password: string;
-  name: string; // you can add other info per user
+  name: string;
+  travelStyle: string;
 }
 
 interface AuthContextType {
-  currentUser: { email: string; name: string } | null;
+  currentUser: { 
+    username: string; 
+    email: string; 
+    name: string; 
+    travelStyle: string 
+  } | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (userData: {
+    username: string;
+    email: string;
+    password: string;
+    name: string;
+    travelStyle: string;
+  }) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// --- Dummy users ---
-const dummyUsers: User[] = [
-  { email: 'adam@gmail.com', password: 'adam123', name: 'Adam' },
-  { email: 'eve@gmail.com', password: 'eve123', name: 'Eve' },
-  { email: 'john@gmail.com', password: 'john123', name: 'John' },
-  { email: 'alice@gmail.com', password: 'alice123', name: 'Alice' },
-];
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<{ email: string; name: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ 
+    username: string; 
+    email: string; 
+    name: string; 
+    travelStyle: string 
+  } | null>(null);
+
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+  const register = async (userData: {
+    username: string;
+    email: string;
+    password: string;
+    name: string;
+    travelStyle: string;
+  }) => {
+    try {
+      console.log('Sending registration data:', userData);
+      
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Registration failed');
+      }
+      
+      setCurrentUser({ 
+        username: responseData.username,
+        email: responseData.email, 
+        name: responseData.name,
+        travelStyle: responseData.travelStyle
+      });
+      
+      console.log('Registration successful:', responseData);
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
+  };
 
   const login = async (email: string, password: string) => {
-    const user = dummyUsers.find(u => u.email === email && u.password === password);
-    if (user) {
-      setCurrentUser({ email: user.email, name: user.name });
-    } else {
-      throw new Error('Invalid credentials');
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
+      }
+
+      const userData = await response.json();
+      setCurrentUser({ 
+        username: userData.username,
+        email: userData.email, 
+        name: userData.name,
+        travelStyle: userData.travelStyle
+      });
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
   };
 
@@ -39,7 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
