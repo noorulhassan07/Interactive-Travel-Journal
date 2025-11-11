@@ -5,7 +5,7 @@ interface User {
   email: string;
   password: string;
   name: string;
-  travelStyle: string;
+  travel_style: string;
 }
 
 interface AuthContextType {
@@ -13,7 +13,7 @@ interface AuthContextType {
     username: string; 
     email: string; 
     name: string; 
-    travelStyle: string 
+    travel_style: string;
   } | null;
   login: (email: string, password: string) => Promise<void>;
   register: (userData: {
@@ -21,7 +21,7 @@ interface AuthContextType {
     email: string;
     password: string;
     name: string;
-    travelStyle: string;
+    travel_style: string;
   }) => Promise<void>;
   logout: () => void;
 }
@@ -33,20 +33,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     username: string; 
     email: string; 
     name: string; 
-    travelStyle: string 
+    travel_style: string;
   } | null>(null);
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
   const register = async (userData: {
     username: string;
     email: string;
     password: string;
     name: string;
-    travelStyle: string;
+    travel_style: string;
   }) => {
     try {
-      console.log('Sending registration data:', userData);
+      console.log('Sending registration data to FastAPI:', userData);
       
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -56,20 +56,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         body: JSON.stringify(userData),
       });
 
-      const responseData = await response.json();
-      
       if (!response.ok) {
-        throw new Error(responseData.message || 'Registration failed');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Registration failed');
       }
+
+      const userDataResponse = await response.json();
       
       setCurrentUser({ 
-        username: responseData.username,
-        email: responseData.email, 
-        name: responseData.name,
-        travelStyle: responseData.travelStyle
+        username: userDataResponse.username,
+        email: userDataResponse.email, 
+        name: userDataResponse.name,
+        travel_style: userDataResponse.travel_style
       });
       
-      console.log('Registration successful:', responseData);
+      console.log('Registration successful:', userDataResponse);
       
     } catch (error) {
       console.error('Registration error:', error);
@@ -79,17 +80,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', password);
+
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({ email, password }),
+        body: formData,
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
+        throw new Error(errorData.detail || 'Login failed');
       }
 
       const userData = await response.json();
@@ -97,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         username: userData.username,
         email: userData.email, 
         name: userData.name,
-        travelStyle: userData.travelStyle
+        travel_style: userData.travel_style
       });
       
     } catch (error) {
