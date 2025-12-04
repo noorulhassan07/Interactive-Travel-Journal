@@ -1,4 +1,3 @@
-# backend/app/services/media_service.py
 import os
 from app.models.media_model import Media
 from app.models.user_model import User
@@ -9,7 +8,6 @@ from fastapi import HTTPException, UploadFile
 UPLOAD_DIR = "static/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-
 async def save_media(file: UploadFile, user_id: str = None, trip_id: str = None):
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     with open(file_path, "wb") as f:
@@ -17,16 +15,16 @@ async def save_media(file: UploadFile, user_id: str = None, trip_id: str = None)
 
     user = await User.get(PydanticObjectId(user_id)) if user_id else None
     trip = await Trip.get(PydanticObjectId(trip_id)) if trip_id else None
+
     media = Media(
         filename=file.filename,
-        file_type=file.content_type,
-        file_path=file_path,
-        uploaded_by=user,
-        trip=trip
+        content_type=file.content_type,
+        url=file_path,
+        owner=user,
+        uploaded_at=None
     )
     await media.insert()
     return media
-
 
 async def get_media_by_id(media_id: PydanticObjectId) -> Media:
     media = await Media.get(media_id)
@@ -34,10 +32,8 @@ async def get_media_by_id(media_id: PydanticObjectId) -> Media:
         raise HTTPException(status_code=404, detail="Media not found")
     return media
 
-
-async def get_all_media():
+async def get_all_media() -> list[Media]:
     return await Media.find_all().to_list()
-
 
 async def delete_media(media_id: PydanticObjectId):
     media = await Media.get(media_id)
