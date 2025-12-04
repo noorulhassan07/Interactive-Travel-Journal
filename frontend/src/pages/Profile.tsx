@@ -1,4 +1,3 @@
-// src/pages/Profile.tsx
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { motion } from 'framer-motion';
@@ -16,50 +15,6 @@ interface UserProfile {
   image?: string;
 }
 
-// Dummy profiles
-const DUMMY_PROFILES: Record<string, UserProfile> = {
-  'adam@gmail.com': {
-    fullName: 'Adam Smith',
-    email: 'adam@gmail.com',
-    contactNumber: '+1 123-456-7890',
-    trips: 5,
-    badges: 3,
-    favoritePlaces: ['Paris', 'Tokyo', 'New York'],
-    address: '123 Main St, Los Angeles, USA',
-    image:'C:/Users/nooru/OneDrive/Desktop/Interactive Travel Journal/frontend/src/assests/images/adam.jpg',
-  },
-  'eve@gmail.com': {
-    fullName: 'Eve Johnson',
-    email: 'eve@gmail.com',
-    contactNumber: '+44 987-654-3210',
-    trips: 3,
-    badges: 2,
-    favoritePlaces: ['London', 'Rome', 'Barcelona'],
-    address: '45 Park Lane, London, UK',
-    image:'C:/Users/nooru/OneDrive/Desktop/Interactive Travel Journal/frontend/src/assests/images/eve.jpg',
-  },
-  'john@gmail.com': {
-    fullName: 'John Doe',
-    email: 'john@gmail.com',
-    contactNumber: '+1 555-555-5555',
-    trips: 7,
-    badges: 5,
-    favoritePlaces: ['Berlin', 'Amsterdam'],
-    address: '89 Oak St, Berlin, Germany',
-    image:'frontend/src/assests/images/joe.jpg',
-  },
-  'alice@gmail.com': {
-    fullName: 'Alice Brown',
-    email: 'alice@gmail.com',
-    contactNumber: '+33 123-987-4567',
-    trips: 2,
-    badges: 1,
-    favoritePlaces: ['Nice', 'Lyon'],
-    address: '77 Rue de la Paix, Lyon, France',
-    image:'C:/Users/nooru/OneDrive/Desktop/Interactive Travel Journal/frontend/src/assests/images/alice.jpeg',
-  },
-};
-
 const Profile = () => {
   const { currentUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -67,21 +22,25 @@ const Profile = () => {
   useEffect(() => {
     if (!currentUser) return;
 
-    const userProfile = DUMMY_PROFILES[currentUser.email] || null;
-    setProfile(userProfile);
+    const fetchProfile = async () => {
+      try {
+        const data: UserProfile = await fetch(`/api/users/${currentUser.id}`).then(res => res.json());
+        setProfile(data);
+      } catch (err) {
+        console.error(err);
+        setProfile(null);
+      }
+    };
+
+    fetchProfile();
   }, [currentUser]);
 
   if (!profile) return <Layout><p className="p-8 text-gray-600">Profile not found.</p></Layout>;
 
   return (
     <Layout>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="p-8 space-y-6"
-      >
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-8 space-y-6">
         <h1 className="text-3xl font-bold">Profile</h1>
-        
         <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">{profile.fullName}</h2>
@@ -89,41 +48,19 @@ const Profile = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center gap-2">
-              <Calendar size={20} className="text-[#0077b6]" />
-              <span><strong>Trips:</strong> {profile.trips}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Award size={20} className="text-[#f77f00]" />
-              <span><strong>Badges:</strong> {profile.badges}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Heart size={20} className="text-[#d62828]" />
-              <span><strong>Favorite Places:</strong> {profile.favoritePlaces.join(', ')}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <MapPin size={20} className="text-[#90be6d]" />
-              <span><strong>Address:</strong> {profile.address}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-[#0077b6] font-bold">Contact:</span>
-              <span>{profile.contactNumber}</span>
-            </div>
+            <div className="flex items-center gap-2"><Calendar size={20} className="text-[#0077b6]" /><span><strong>Trips:</strong> {profile.trips}</span></div>
+            <div className="flex items-center gap-2"><Award size={20} className="text-[#f77f00]" /><span><strong>Badges:</strong> {profile.badges}</span></div>
+            <div className="flex items-center gap-2"><Heart size={20} className="text-[#d62828]" /><span><strong>Favorite Places:</strong> {profile.favoritePlaces.join(', ')}</span></div>
+            <div className="flex items-center gap-2"><MapPin size={20} className="text-[#90be6d]" /><span><strong>Address:</strong> {profile.address}</span></div>
+            <div className="flex items-center gap-2"><span className="text-[#0077b6] font-bold">Contact:</span><span>{profile.contactNumber}</span></div>
           </div>
-        </div>
-        {profile.image && (
+
+          {profile.image && (
             <div className='w-32 h-32 md:w-40 md:h-40 flex-shrink-0'>
-                <img
-                src={profile.image}
-                alt={`${profile.fullName}avatar`}
-                className = "w-full h-full object-cover rounded-full shadow-lg"
-                />
+              <img src={profile.image} alt={`${profile.fullName} avatar`} className="w-full h-full object-cover rounded-full shadow-lg" />
             </div>
-            )}
+          )}
+        </div>
       </motion.div>
     </Layout>
   );
