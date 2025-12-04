@@ -1,6 +1,7 @@
+# backend/app/routes/user_router.py
 from fastapi import APIRouter
 
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.get("/")
 async def get_users():
