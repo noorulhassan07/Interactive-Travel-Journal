@@ -6,11 +6,18 @@ from datetime import datetime
 class MediaOut(BaseModel):
     id: str
     filename: str
-    content_type: Optional[str]
-    url: Optional[str]
-    owner_id: Optional[str]
+    content_type: Optional[str] = None
+    url: Optional[str] = None
+    owner_id: Optional[str] = None
     uploaded_at: datetime
-    description: Optional[str]
+    description: Optional[str] = None
 
     class Config:
         orm_mode = True
+
+class MediaCreate(BaseModel):
+    filename: str
+    content_type: Optional[str] = None
+    url: Optional[str] = None
+    owner_id: Optional[str] = None
+    description: Optional[str] = None
