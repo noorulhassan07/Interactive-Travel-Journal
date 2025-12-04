@@ -1,4 +1,3 @@
-# backend/app/models/media_model.py
 from beanie import Document, Link
 from pydantic import Field
 from typing import Optional
