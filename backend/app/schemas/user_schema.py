@@ -1,4 +1,3 @@
-# backend/app/schemas/user_schema.py
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
@@ -18,10 +17,7 @@ class UserOut(BaseModel):
     created_at: datetime
     is_active: bool
     is_verified: bool
+    badges: int
 
     class Config:
         orm_mode = True
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
