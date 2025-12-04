@@ -1,8 +1,7 @@
-# backend/app/models/user_model.py
-from beanie import Document, Indexed
+from beanie import Document
 from pydantic import EmailStr, Field
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 class User(Document):
     email: EmailStr = Field(...)
@@ -13,6 +12,7 @@ class User(Document):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     is_active: bool = Field(default=True)
     is_verified: bool = Field(default=False)
+    badges: int = Field(default=0)
 
     class Settings:
         name = "users"
