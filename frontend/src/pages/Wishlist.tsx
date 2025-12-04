@@ -4,24 +4,47 @@ import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getUserWishlist } from '../services/api';
 
-// Dummy wishlist items
-const DUMMY_WISHLIST = [
-  { id: 1, userEmail: 'adam@gmail.com', city: 'Rome', country: 'Italy', notes: 'Visit Colosseum', priority: 5 },
-  { id: 2, userEmail: 'eve@gmail.com', city: 'Nairobi', country: 'Kenya', notes: 'Safari trip', priority: 4 },
-  { id: 3, userEmail: 'adam@gmail.com', city: 'Kyoto', country: 'Japan', notes: 'Cherry blossom season', priority: 3 },
-];
+interface WishlistItem {
+  id: string;
+  city: string;
+  country: string;
+  notes?: string;
+  priority: number;
+}
 
 const Wishlist = () => {
   const { currentUser } = useAuth();
-  const [wishlist, setWishlist] = useState<typeof DUMMY_WISHLIST>([]);
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (currentUser) {
-      const userWishlist = DUMMY_WISHLIST.filter(w => w.userEmail === currentUser.email);
-      setWishlist(userWishlist);
-    }
+    if (!currentUser) return;
+
+    const loadWishlist = async () => {
+      try {
+        const response = await getUserWishlist(currentUser.email);
+        setWishlist(response.data);
+      } catch (err) {
+        console.error("Error fetching wishlist:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadWishlist();
   }, [currentUser]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-full text-2xl text-gray-600">
+          Loading wishlist...
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
