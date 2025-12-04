@@ -9,8 +9,10 @@ db = MongoDB()
 
 async def init_db(mongo_url: str = None):
     if not mongo_url:
-        mongo_url = os.getenv("MONGODB_URL", "mongodb://root:example@mongo:27017/travel_journal_db?authSource=admin")
-    
+        mongo_url = os.getenv(
+            "MONGODB_URL",
+            "mongodb://root:example@mongo:27017/travel_journal_db?authSource=admin"
+        )
     db.client = AsyncIOMotorClient(mongo_url)
     db.database = db.client.travel_journal_db
     await db.client.admin.command('ping')
