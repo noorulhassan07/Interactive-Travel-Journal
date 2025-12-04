@@ -19,9 +19,8 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Call the AuthContext login function which checks dummy users
       await login(email, password);
-      navigate('/dashboard'); // Redirect after successful login
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed. Check your credentials.');
     }
