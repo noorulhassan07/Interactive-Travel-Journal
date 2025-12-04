@@ -1,35 +1,69 @@
+// frontend/src/pages/TripDetail.tsx
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
-import { Map, Calendar } from 'lucide-react';
+import { Calendar, Map } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { getTripById } from '../services/api';
 
-// Dummy trips
-const DUMMY_TRIPS = [
-  { id: 1, userEmail: 'adam@gmail.com', name: 'Paris Adventure', description: 'Eiffel Tower, Louvre', start_date: '2025-10-01', end_date: '2025-10-05' },
-  { id: 2, userEmail: 'eve@gmail.com', name: 'Safari in Kenya', description: 'Wildlife and Nature', start_date: '2025-11-10', end_date: '2025-11-20' },
-  { id: 3, userEmail: 'adam@gmail.com', name: 'Tokyo Exploration', description: 'Food & Culture', start_date: '2025-12-05', end_date: '2025-12-10' },
-];
+interface Trip {
+  id: number;
+  userEmail: string;
+  name: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
+}
 
 const TripDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { currentUser } = useAuth();
-  const [trip, setTrip] = useState<typeof DUMMY_TRIPS[0] | null>(null);
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (currentUser) {
-      const foundTrip = DUMMY_TRIPS.find(t => t.id === Number(id) && t.userEmail === currentUser.email);
-      setTrip(foundTrip || null);
-    }
+    const fetchTrip = async () => {
+      if (!currentUser || !id) return;
+
+      try {
+        const { data } = await getTripById(Number(id));
+        if (data.userEmail === currentUser.email) {
+          setTrip(data);
+        } else {
+          setTrip(null);
+        }
+      } catch (error) {
+        console.error('Failed to fetch trip:', error);
+        setTrip(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrip();
   }, [id, currentUser]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-600 text-xl">Loading trip details...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!trip) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-600 text-xl">Trip not found or you don't have access.</p>
-          <Link to="/trips" className="ml-4 text-blue-600 underline">Go Back</Link>
+        <div className="flex items-center justify-center h-full flex-col">
+          <p className="text-gray-600 text-xl mb-4">
+            Trip not found or you don't have access.
+          </p>
+          <Link to="/trips" className="text-blue-600 underline">
+            Go Back
+          </Link>
         </div>
       </Layout>
     );
@@ -39,7 +73,8 @@ const TripDetail = () => {
     <Layout>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
         <h1 className="text-4xl font-bold text-gray-800">{trip.name}</h1>
-        <p className="text-gray-600 mb-4">{trip.description}</p>
+        {trip.description && <p className="text-gray-600 mb-4">{trip.description}</p>}
+
         {trip.start_date && (
           <div className="flex items-center gap-2 text-gray-500">
             <Calendar size={20} />
@@ -52,10 +87,14 @@ const TripDetail = () => {
             )}
           </div>
         )}
+
         <div className="w-full h-64 bg-gradient-to-br from-[#0077b6] to-[#023e8a] rounded-xl flex items-center justify-center mt-6">
           <Map size={48} className="text-white" />
         </div>
-        <Link to="/trips" className="text-blue-600 underline mt-4 block">Back to Trips</Link>
+
+        <Link to="/trips" className="text-blue-600 underline mt-4 block">
+          Back to Trips
+        </Link>
       </motion.div>
     </Layout>
   );
