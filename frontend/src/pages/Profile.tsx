@@ -3,7 +3,7 @@ import Layout from '../components/Layout';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { MapPin, Heart, Award, Calendar } from 'lucide-react';
-import { getCurrentUser } from '../services/api';  // ✅ FIXED IMPORT
+import { getCurrentUser } from '../services/api';
 
 interface UserProfile {
   fullName: string;
@@ -21,21 +21,23 @@ const Profile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    if (!currentUser) return;
+  if (!currentUser) return;
 
-    const fetchProfile = async () => {
-      try {
-        const response = await getCurrentUser();   // ✅ Works now
-        setProfile(response.data);
-      } catch (err) {
-        console.error(err);
-        setProfile(null);
-      }
-    };
+  const fetchProfile = async () => {
+    try {
+      console.log("Fetching profile for user:", currentUser);
+      const response = await getCurrentUser();
+      console.log("API Response:", response);
+      console.log("Response data:", response.data);
+      setProfile(response.data);
+    } catch (err) {
+      console.error("Profile fetch error:", err);
+      setProfile(null);
+    }
+  };
 
-    fetchProfile();
-  }, [currentUser]);
-
+  fetchProfile();
+}, [currentUser]);
   if (!profile)
     return (
       <Layout>
