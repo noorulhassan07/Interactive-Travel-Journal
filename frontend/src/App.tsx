@@ -1,4 +1,3 @@
-// frontend/src/App.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import PrivateRoute from "./components/PrivateRoute";
@@ -14,7 +13,7 @@ import Profile from "./pages/Profile";
 import Globe from "./pages/Globe";
 import NewTripForm from "./components/NewTripForm";
 import AdminPanel from "./pages/AdminPanel";
-import AdminLogin from "./pages/AdminLogin"; // create a separate Admin login page
+import AdminLogin from "./pages/AdminLogin";
 
 function AppRoutes() {
   const { currentUser } = useAuth();
@@ -22,12 +21,11 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public Routes */}
+
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/admin/login" element={<AdminLogin />} />
 
-      {/* Private User Routes */}
       <Route
         path="/dashboard"
         element={
@@ -95,13 +93,11 @@ function AppRoutes() {
         }
       />
 
-      {/* Admin Routes */}
       <Route
         path="/admin"
         element={isAdmin ? <AdminPanel /> : <Navigate to="/admin/login" replace />}
       />
 
-      {/* Default Route */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
