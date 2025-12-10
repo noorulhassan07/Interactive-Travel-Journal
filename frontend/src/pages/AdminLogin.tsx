@@ -13,15 +13,22 @@ const AdminLogin: React.FC = () => {
     setError("");
 
     try {
-      const res = await api.post("/auth/admin/login", { email, password });
-      const { token } = res.data;
+      const res = await api.post("/auth/login", { email, password });
+      const { token, user } = res.data;
 
-      // Save token in localStorage
-      localStorage.setItem("adminToken", token);
-      navigate("/admin/dashboard");
+      if (!user.isAdmin) {
+        setError("Access denied. Admin privileges required.");
+        return;
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("isAdmin", "true");
+      
+      navigate("/admin/panel");
     } catch (err: any) {
       console.error("Admin login error:", err);
-      setError("Invalid admin credentials.");
+      setError(err.response?.data?.message || "Invalid credentials.");
     }
   };
 
