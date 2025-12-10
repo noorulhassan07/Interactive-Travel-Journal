@@ -6,8 +6,6 @@ interface User {
   id: string;
   username: string;
   email: string;
-  password: string;
-  badges_count: number;
 }
 
 const AdminPanel: React.FC = () => {
@@ -19,9 +17,17 @@ const AdminPanel: React.FC = () => {
     const fetchUsers = async () => {
       setLoading(true);
       setError("");
+
       try {
+        const token = localStorage.getItem("adminToken");
+        if (!token) {
+          setError("Admin not authenticated");
+          setLoading(false);
+          return;
+        }
+
         const res = await api.get<User[]>("/admin/users", {
-          params: { username: "admin@gmail.com", password: "admin@123" },
+          headers: { Authorization: `Bearer ${token}` },
         });
         setUsers(res.data);
       } catch (err: any) {
@@ -31,39 +37,42 @@ const AdminPanel: React.FC = () => {
         setLoading(false);
       }
     };
+
     fetchUsers();
   }, []);
 
   return (
     <Layout>
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-4">Admin Panel</h1>
+      <div style={styles.container}>
+        <h1 style={styles.heading}>Admin Panel</h1>
 
-        {loading && <p>Loading users...</p>}
-        {error && <p className="text-red-500">{error}</p>}
+        {loading && <p style={styles.loading}>Loading users...</p>}
+        {error && <p style={styles.error}>{error}</p>}
 
         {!loading && !error && (
           <>
-            <p className="mb-4 font-semibold">Total Users: {users.length}</p>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border rounded-lg shadow-lg">
-                <thead className="bg-gray-200">
+            <p style={styles.totalUsers}>Total Users: {users.length}</p>
+            <div style={styles.tableContainer}>
+              <table style={styles.table}>
+                <thead>
                   <tr>
-                    <th className="py-2 px-4 border">#</th>
-                    <th className="py-2 px-4 border">Username</th>
-                    <th className="py-2 px-4 border">Email</th>
-                    <th className="py-2 px-4 border">Password</th>
-                    <th className="py-2 px-4 border">Badges</th>
+                    <th style={styles.th}>#</th>
+                    <th style={styles.th}>Username</th>
+                    <th style={styles.th}>Email</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user, index) => (
-                    <tr key={user.id} className="text-center">
-                      <td className="py-2 px-4 border">{index + 1}</td>
-                      <td className="py-2 px-4 border">{user.username}</td>
-                      <td className="py-2 px-4 border">{user.email}</td>
-                      <td className="py-2 px-4 border">{user.password}</td>
-                      <td className="py-2 px-4 border">{user.badges_count}</td>
+                    <tr
+                      key={user.id}
+                      style={{
+                        ...styles.tr,
+                        backgroundColor: index % 2 === 0 ? "#f9fafb" : "#fff",
+                      }}
+                    >
+                      <td style={styles.td}>{index + 1}</td>
+                      <td style={styles.td}>{user.username}</td>
+                      <td style={styles.td}>{user.email}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -74,6 +83,51 @@ const AdminPanel: React.FC = () => {
       </div>
     </Layout>
   );
+};
+
+const styles: Record<string, React.CSSProperties> = {
+  container: {
+    padding: "30px",
+    maxWidth: "800px",
+    margin: "auto",
+    background: "white",
+    borderRadius: "12px",
+    boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
+  },
+  heading: {
+    fontSize: "32px",
+    fontWeight: "bold",
+    marginBottom: "20px",
+    textAlign: "center",
+    color: "#333",
+  },
+  loading: { textAlign: "center", fontSize: "18px", color: "#555" },
+  error: { textAlign: "center", fontSize: "18px", color: "red" },
+  totalUsers: { fontWeight: "bold", fontSize: "18px", marginBottom: "15px" },
+  tableContainer: { overflowX: "auto" },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    borderRadius: "10px",
+    overflow: "hidden",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+  },
+  th: {
+    background: "#2563eb",
+    color: "white",
+    padding: "12px",
+    border: "none",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    fontSize: "12px",
+  },
+  tr: { transition: "0.2s" },
+  td: {
+    padding: "12px",
+    textAlign: "center",
+    fontSize: "14px",
+    borderBottom: "1px solid #e5e7eb",
+  },
 };
 
 export default AdminPanel;
