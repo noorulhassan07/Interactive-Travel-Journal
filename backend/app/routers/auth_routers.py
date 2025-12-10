@@ -23,6 +23,7 @@ class TokenResponse(BaseModel):
     token_type: str
     user: dict
 
+
 @router.post("/register")
 async def register(user_data: UserRegister):
     db = get_database()
@@ -40,7 +41,7 @@ async def register(user_data: UserRegister):
     
     new_user = user_data.dict()
     new_user["password"] = hashed_password
-    new_user["countriesVisited"] = 0
+    new_user["countriesVisited"] = 0 
     
     result = await db["users"].insert_one(new_user)
     
@@ -50,6 +51,7 @@ async def register(user_data: UserRegister):
 async def login(login_data: UserLogin):
     db = get_database()
     
+
     user = await db["users"].find_one({"email": login_data.email})
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
