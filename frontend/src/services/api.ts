@@ -32,16 +32,25 @@ export const registerUser = (data: { username: string; email: string; password: 
 
 export const getCurrentUser = () => jsonApi.get("/auth/me");
 
-export const getUserTrips = (userEmail: string) =>
-  jsonApi.get(`/trips/user?email=${userEmail}`);
-
-export const getTripById = (tripId: string) => jsonApi.get(`/trips/${tripId}`);
-
 export const uploadTravelLog = (formData: FormData) => {
   return api.post("/trips/upload", formData);
 };
 
-export const deleteTrip = (tripId: string) => jsonApi.delete(`/trips/${tripId}`);
+export const getTrips = () => api.get("/trips");
+
+export const getTripById = (tripId: string) => api.get(`/trips/${tripId}`);
+
+export const getUserTrips = (userId: string) => 
+  api.get(`/trips/user/${userId}`);
+
+export const deleteTrip = (tripId: string) => api.delete(`/trips/${tripId}`);
+
+export const getTripPhoto = (tripId: string, thumbnail: boolean = false) => {
+  const url = `/trips/photo/${tripId}${thumbnail ? '?thumbnail=true' : ''}`;
+  return api.get(url, { responseType: 'blob' });
+};
+
+export const getHDFSStats = () => api.get("/trips/hdfs/stats");
 
 export const getLeaderboard = (userId?: string) =>
   jsonApi.get(`/users/leaderboard${userId ? `?user_id=${userId}` : ""}`);
@@ -51,3 +60,5 @@ export const getUserFriends = (email: string) =>
 
 export const followUser = (friendId: string, followerId: string) =>
   jsonApi.post(`/users/follow/${friendId}?follower_id=${followerId}`);
+
+export const getUserProfile = () => api.get("/users/profile");
