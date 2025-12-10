@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from app.db import get_database
+from app.auth import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from datetime import timedelta
 from typing import Optional
-from bson import ObjectId
 
 router = APIRouter()
 
@@ -17,47 +18,59 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-class UserResponse(BaseModel):
-    id: str
-    username: str
-    email: EmailStr
-    name: str
-    travel_style: str
-    message: Optional[str] = None
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: dict
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register")
 async def register(user_data: UserRegister):
     db = get_database()
+    
     existing_user = await db["users"].find_one({
         "$or": [{"email": user_data.email}, {"username": user_data.username}]
     })
     if existing_user:
-        raise HTTPException(status_code=400, detail="User with this email or username already exists")
+        raise HTTPException(
+            status_code=400, 
+            detail="User with this email or username already exists"
+        )
 
-    result = await db["users"].insert_one(user_data.dict())
-    return {
-        "id": str(result.inserted_id),
-        "username": user_data.username,
-        "email": user_data.email,
-        "name": user_data.name,
-        "travel_style": user_data.travel_style,
-        "message": "User registered successfully"
-    }
+    hashed_password = get_password_hash(user_data.password)
+    
+    new_user = user_data.dict()
+    new_user["password"] = hashed_password
+    new_user["countriesVisited"] = 0
+    
+    result = await db["users"].insert_one(new_user)
+    
+    return {"message": "User registered successfully", "id": str(result.inserted_id)}
 
-@router.post("/login", response_model=UserResponse)
+@router.post("/login", response_model=TokenResponse)
 async def login(login_data: UserLogin):
     db = get_database()
+    
     user = await db["users"].find_one({"email": login_data.email})
     if not user:
-        raise HTTPException(status_code=401, detail="User not found")
-    if user["password"] != login_data.password:
-        raise HTTPException(status_code=401, detail="Invalid password")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    if not verify_password(login_data.password, user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["email"]}, 
+        expires_delta=access_token_expires
+    )
 
     return {
-        "id": str(user["_id"]),
-        "username": user["username"],
-        "email": user["email"],
-        "name": user["name"],
-        "travel_style": user["travel_style"],
-        "message": "Login successful"
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": str(user["_id"]),
+            "username": user["username"],
+            "email": user["email"],
+            "name": user["name"],
+            "travel_style": user.get("travel_style", "")
+        }
     }
