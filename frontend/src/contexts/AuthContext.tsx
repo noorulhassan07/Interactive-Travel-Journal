@@ -1,12 +1,13 @@
-// frontend/src/contexts/AuthContext.tsx
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
 export interface User {
-  id: string;
+  _id?: string;
+  id?: string; 
   username: string;
   email: string;
   name: string;
   travelStyle: string;
+  isAdmin?: boolean;  
 }
 
 interface AuthContextType {
@@ -14,6 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (username: string, email: string, password: string, travelStyle: string) => Promise<void>;
   logout: () => void;
+  isAdmin: boolean; 
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,7 +26,21 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const API_BASE_URL = "http://localhost:8000";
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setCurrentUser(user);
+        setIsAdmin(user.isAdmin === true);
+      } catch (error) {
+        console.error("Failed to parse user from localStorage:", error);
+      }
+    }
+  }, []);
 
   const signup = async (username: string, email: string, password: string, travelStyle: string) => {
     const payload = {
@@ -49,13 +65,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const data = await res.json();
 
-      setCurrentUser({
-        id: data.id,
+      const userData: User = {
+        _id: data._id || data.id,
+        id: data.id || data._id,
         username: data.username,
         email: data.email,
         name: data.name || data.username,
         travelStyle: data.travel_style || travelStyle,
-      });
+        isAdmin: data.isAdmin || false,
+      };
+
+      setCurrentUser(userData);
+      setIsAdmin(userData.isAdmin || false);
+      localStorage.setItem("user", JSON.stringify(userData));
       console.log("Registration successful:", data);
 
     } catch (error: any) {
@@ -78,13 +100,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const data = await res.json();
-      setCurrentUser({
-        id: data.id,
+      
+      const userData: User = {
+        _id: data._id || data.id,
+        id: data.id || data._id,
         username: data.username,
         email: data.email,
         name: data.name || data.username,
         travelStyle: data.travel_style || "",
-      });
+        isAdmin: data.isAdmin || false,
+      };
+
+      setCurrentUser(userData);
+      setIsAdmin(userData.isAdmin || false);
+      
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("token", data.token || data.access_token);
+      
+      if (userData.isAdmin) {
+        localStorage.setItem("isAdmin", "true");
+      }
 
     } catch (error: any) {
       console.error("Login error:", error.message || error);
@@ -94,10 +129,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     setCurrentUser(null);
+    setIsAdmin(false);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("isAdmin");
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, signup, logout }}>
+    <AuthContext.Provider value={{ 
+      currentUser, 
+      login, 
+      signup, 
+      logout,
+      isAdmin 
+    }}>
       {children}
     </AuthContext.Provider>
   );
