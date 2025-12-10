@@ -1,3 +1,4 @@
+# backend/app/services/user_service.py
 from app.models.user_model import User
 from app.schemas.user_schema import UserOut
 from fastapi import HTTPException
