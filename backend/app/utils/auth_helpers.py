@@ -1,3 +1,4 @@
+#backend/app/utils/auth_helpers.py
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.utils.security import decode_access_token
