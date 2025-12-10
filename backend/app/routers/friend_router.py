@@ -4,12 +4,14 @@ from app.db import get_database
 
 router = APIRouter(prefix="/friends", tags=["Friends"])
 
+
 def validate_object_id(id_str: str):
     """Convert string to ObjectId or raise 400"""
     try:
         return ObjectId(id_str)
     except:
         raise HTTPException(400, "Invalid user ID")
+
 
 @router.post("/follow/{friend_id}")
 async def toggle_follow(friend_id: str, user_id: str = Query(...)):
@@ -34,6 +36,7 @@ async def toggle_follow(friend_id: str, user_id: str = Query(...)):
     await db.users.update_one({"_id": user_oid}, {"$set": {"following": following}})
 
     return {"status": "success", "following": following}
+
 
 @router.get("/")
 async def get_friends(email: str = Query(...)):
@@ -62,6 +65,7 @@ async def get_friends(email: str = Query(...)):
 
     return result
 
+
 @router.get("/search")
 async def search_users(username: str = Query(...)):
     """
@@ -82,6 +86,7 @@ async def search_users(username: str = Query(...)):
         })
 
     return result
+
 
 @router.get("/leaderboard")
 async def get_leaderboard(user_id: str = Query(...)):
@@ -109,4 +114,5 @@ async def get_leaderboard(user_id: str = Query(...)):
             "countriesVisited": u.get("countriesVisited", 0),
             "isFollowing": str(u["_id"]) in following
         })
+
     return result
