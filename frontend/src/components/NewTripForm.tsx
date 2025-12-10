@@ -1,8 +1,9 @@
+// frontend/src/components/NewTripForm.tsx
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { uploadTravelLog } from "../services/api";
 
 interface NewTripFormProps {
-  userId: number;
+  userId: string;
   onSuccess?: () => void;
 }
 
@@ -32,7 +33,7 @@ const NewTripForm: React.FC<NewTripFormProps> = ({ userId, onSuccess }) => {
     setMessage("");
 
     const formData = new FormData();
-    formData.append("user_id", userId.toString());
+    formData.append("user_id", userId);
     formData.append("country", country);
     formData.append("place_name", placeName);
     formData.append("description", description);
@@ -56,9 +57,10 @@ const NewTripForm: React.FC<NewTripFormProps> = ({ userId, onSuccess }) => {
   };
 
   return (
-    <div style={styles.container}>
+    <div style={styles.card}>
       <h2 style={styles.title}>Add a New Trip</h2>
-      <form onSubmit={handleSubmit}>
+
+      <form onSubmit={handleSubmit} style={styles.form}>
         <label style={styles.label}>Country</label>
         <input
           type="text"
@@ -94,15 +96,31 @@ const NewTripForm: React.FC<NewTripFormProps> = ({ userId, onSuccess }) => {
           accept="image/*"
           onChange={handlePhotoChange}
           required
-          style={{ marginBottom: "15px" }}
+          style={styles.file}
         />
 
-        <button type="submit" disabled={loading} style={{ ...styles.button, background: loading ? "#999" : "#007bff" }}>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            ...styles.button,
+            background: loading
+              ? "#9ca3af"
+              : "linear-gradient(135deg, #2563eb, #1d4ed8)",
+          }}
+        >
           {loading ? "Uploading..." : "Add Trip"}
         </button>
 
         {message && (
-          <p style={{ ...styles.message, color: message.includes("success") ? "green" : "red" }}>{message}</p>
+          <p
+            style={{
+              ...styles.message,
+              color: message.includes("success") ? "green" : "red",
+            }}
+          >
+            {message}
+          </p>
         )}
       </form>
     </div>
@@ -110,53 +128,78 @@ const NewTripForm: React.FC<NewTripFormProps> = ({ userId, onSuccess }) => {
 };
 
 const styles: Record<string, React.CSSProperties> = {
-  container: {
-    width: "400px",
-    margin: "30px auto",
-    padding: "20px",
-    borderRadius: "10px",
-    background: "#ffffff",
-    boxShadow: "0px 0px 15px rgba(0,0,0,0.1)",
-    fontFamily: "Arial, sans-serif",
+  card: {
+    width: "450px",
+    margin: "40px auto",
+    padding: "30px",
+    borderRadius: "20px",
+    background: "linear-gradient(145deg, #fefefe, #f0f4ff)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+    transition: "transform 0.3s, box-shadow 0.3s",
   },
   title: {
     textAlign: "center",
-    marginBottom: "20px",
-    color: "#333",
-  },
-  label: {
+    fontSize: "24px",
     fontWeight: "bold",
-    display: "block",
-    marginBottom: "5px",
+    marginBottom: "25px",
+    color: "#1d3557",
+    textShadow: "1px 1px 2px rgba(0,0,0,0.1)",
+  },
+  form: { display: "flex", flexDirection: "column" },
+  label: {
+    fontWeight: "600",
+    marginBottom: "8px",
+    color: "#4a4a4a",
+    fontSize: "14.5px",
   },
   input: {
-    width: "100%",
-    padding: "10px",
-    marginBottom: "15px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
+    padding: "14px",
+    borderRadius: "12px",
+    border: "1px solid #d1d5db",
+    marginBottom: "18px",
+    fontSize: "15px",
+    outline: "none",
+    transition: "0.3s",
+  },
+  inputFocus: {
+    borderColor: "#2563eb",
+    boxShadow: "0 0 8px rgba(37,99,235,0.2)",
   },
   textarea: {
-    width: "100%",
-    padding: "10px",
-    marginBottom: "15px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-    minHeight: "100px",
+    padding: "14px",
+    borderRadius: "12px",
+    border: "1px solid #d1d5db",
+    marginBottom: "18px",
+    minHeight: "130px",
+    fontSize: "15px",
+    outline: "none",
+    transition: "0.3s",
+  },
+  file: {
+    marginBottom: "18px",
   },
   button: {
     width: "100%",
-    padding: "12px",
-    color: "#fff",
+    padding: "16px",
+    color: "white",
     border: "none",
-    borderRadius: "5px",
+    borderRadius: "12px",
     cursor: "pointer",
     fontWeight: "bold",
+    fontSize: "16px",
+    background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+    boxShadow: "0 5px 15px rgba(37, 99, 235, 0.4)",
+    transition: "0.3s",
+  },
+  buttonHover: {
+    transform: "translateY(-2px)",
+    boxShadow: "0 8px 20px rgba(37, 99, 235, 0.5)",
   },
   message: {
-    marginTop: "15px",
+    marginTop: "18px",
     textAlign: "center",
     fontWeight: "bold",
+    fontSize: "15px",
   },
 };
 
