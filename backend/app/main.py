@@ -1,3 +1,4 @@
+#backend/app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db import init_db
@@ -15,7 +16,7 @@ app.include_router(admin_router.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(auth_routes.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(user_routes.router, prefix="/api/users", tags=["Users"])
 app.include_router(trip_routes.router, prefix="/api/trips", tags=["Trips"])
-app.include_router(media_routes.router, prefix="/api/media", tags=["Media"])
+app.include_router(media_routes.router, prefix="/api", tags=["Media"])
 
 # CORS
 app.add_middleware(
