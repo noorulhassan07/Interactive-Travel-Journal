@@ -1,3 +1,4 @@
+# backend/app/routers/admin_router.py
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
