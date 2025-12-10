@@ -6,8 +6,7 @@ from datetime import datetime
 UPLOAD_DIR = "static/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf", "docx"}
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
-
+MAX_FILE_SIZE = 5 * 1024 * 1024 
 
 async def save_upload_file(upload_file: UploadFile) -> str:
     file_extension = upload_file.filename.split(".")[-1].lower()
@@ -26,7 +25,6 @@ async def save_upload_file(upload_file: UploadFile) -> str:
         f.write(contents)
 
     return file_path
-
 
 async def remove_file(file_path: str):
     if os.path.exists(file_path):
