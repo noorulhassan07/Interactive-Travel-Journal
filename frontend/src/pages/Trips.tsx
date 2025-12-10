@@ -21,9 +21,10 @@ const Trips = () => {
 
   useEffect(() => {
     if (!currentUser) return;
+
     const loadTrips = async () => {
       try {
-        const {data} = await getUserTrips(currentUser.email);
+        const { data } = await getUserTrips(currentUser.email);
         setTrips(data);
       } catch (err) {
         console.error('Error fetching trips:', err);
@@ -31,6 +32,7 @@ const Trips = () => {
         setLoading(false);
       }
     };
+
     loadTrips();
   }, [currentUser]);
 
@@ -55,8 +57,7 @@ const Trips = () => {
               whileTap={{ scale: 0.95 }}
               className="bg-gradient-to-r from-[#0077b6] to-[#023e8a] text-white px-6 py-3 rounded-xl font-semibold shadow-lg flex items-center gap-2"
             >
-              <Plus size={20} />
-              New Trip
+              <Plus size={20} /> New Trip
             </motion.button>
           </Link>
         </div>
@@ -77,10 +78,8 @@ const Trips = () => {
             {trips.map((trip) => (
               <Link key={trip.id} to={`/trips/${trip.id}`}>
                 <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all h-full border-2 border-transparent hover:border-[#0077b6]">
-                  <div className="mb-4">
-                    <div className="w-full h-40 bg-gradient-to-br from-[#0077b6] to-[#023e8a] rounded-xl flex items-center justify-center">
-                      <Map size={48} className="text-white" />
-                    </div>
+                  <div className="w-full h-40 bg-gradient-to-br from-[#0077b6] to-[#023e8a] rounded-xl flex items-center justify-center mb-4">
+                    <Map size={48} className="text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-800 mb-2">{trip.name}</h3>
                   <p className="text-gray-600 mb-4 line-clamp-3">{trip.description || 'No description'}</p>
