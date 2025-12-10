@@ -1,4 +1,3 @@
-// frontend/src/pages/TripDetail.tsx
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -23,11 +22,11 @@ const TripDetail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTrip = async () => {
-      if (!currentUser || !id) return;
+    if (!currentUser || !id) return;
 
+    const fetchTrip = async () => {
       try {
-        const { data } = await getTripById(Number(id));
+        const { data } = await getTripById(id!);
         if (data.userEmail === currentUser.email) {
           setTrip(data);
         } else {
@@ -57,7 +56,7 @@ const TripDetail = () => {
   if (!trip) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-full flex-col">
+        <div className="flex flex-col items-center justify-center h-full">
           <p className="text-gray-600 text-xl mb-4">
             Trip not found or you don't have access.
           </p>
