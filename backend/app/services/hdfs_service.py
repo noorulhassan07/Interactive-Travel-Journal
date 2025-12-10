@@ -1,4 +1,3 @@
-# Create new file: backend/app/services/hdfs_service.py
 import os
 import uuid
 from typing import Optional, BinaryIO
@@ -25,10 +24,8 @@ class HDFSService:
             logger.info(f"Connecting to HDFS at {self.webui_url} as {self.hdfs_user}")
             self.client = InsecureClient(self.webui_url, user=self.hdfs_user)
             
-            # Test connection
             self.client.status("/")
             
-            # Initialize directory structure
             self._init_directories()
             
             logger.info("HDFS connection established successfully")
@@ -75,16 +72,13 @@ class HDFSService:
                 raise HTTPException(status_code=500, detail="HDFS not available")
         
         try:
-            # Generate unique filename
             file_ext = os.path.splitext(filename)[1].lower() or '.jpg'
             unique_filename = f"{uuid.uuid4()}{file_ext}"
             
-            # Create user directory if it doesn't exist
             user_dir = f"{self.base_path}/photos/original/{user_id}"
             if not self.client.status(user_dir, strict=False):
                 self.client.makedirs(user_dir)
             
-            # Upload to HDFS
             hdfs_path = f"{user_dir}/{unique_filename}"
             
             logger.info(f"Uploading photo to HDFS: {hdfs_path}")
@@ -92,7 +86,6 @@ class HDFSService:
             with self.client.write(hdfs_path, overwrite=True) as writer:
                 writer.write(photo_data)
             
-            # Also create thumbnail (optional)
             self._create_thumbnail(user_id, photo_data, unique_filename, file_ext)
             
             logger.info(f"Photo uploaded successfully: {hdfs_path}")
@@ -110,17 +103,15 @@ class HDFSService:
         try:
             from PIL import Image
             import io
-            
-            # Create thumbnail directory
+        
             thumb_dir = f"{self.base_path}/photos/thumbnails/{user_id}"
             if not self.client.status(thumb_dir, strict=False):
                 self.client.makedirs(thumb_dir)
             
-            # Create thumbnail
+        
             image = Image.open(io.BytesIO(photo_data))
             image.thumbnail((300, 300))
-            
-            # Save thumbnail to bytes
+        
             thumb_io = io.BytesIO()
             if file_ext in ['.jpg', '.jpeg']:
                 image.save(thumb_io, format='JPEG', quality=85)
@@ -131,7 +122,6 @@ class HDFSService:
             
             thumb_data = thumb_io.getvalue()
             
-            # Upload thumbnail to HDFS
             thumb_path = f"{thumb_dir}/{filename}"
             with self.client.write(thumb_path, overwrite=True) as writer:
                 writer.write(thumb_data)
@@ -193,10 +183,8 @@ class HDFSService:
                 return {"status": "disconnected"}
         
         try:
-            # Get overall HDFS status
             status = self.client.status("/")
             
-            # Get travel journal directory stats
             photos_count = 0
             total_photo_size = 0
             
@@ -221,5 +209,5 @@ class HDFSService:
             logger.error(f"Failed to get HDFS stats: {str(e)}")
             return {"status": "error", "message": str(e)}
 
-# Singleton instance
+
 hdfs_service = HDFSService()
