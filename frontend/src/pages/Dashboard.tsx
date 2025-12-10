@@ -1,3 +1,4 @@
+//frontend/src/pages/Dashboard.tsx
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -6,9 +7,7 @@ import Layout from "../components/Layout";
 import { Map, Heart, Award, Users, Plus, Calendar } from "lucide-react";
 import api from "../services/api";
 
-// ----------------------
-// ✅ TypeScript Interfaces
-// ----------------------
+
 interface Trip {
   id: number;
   name: string;
