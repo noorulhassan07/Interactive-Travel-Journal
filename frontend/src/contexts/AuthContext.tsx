@@ -1,3 +1,4 @@
+// frontend/src/contexts/AuthContext.tsx
 import { createContext, useContext, useState, ReactNode } from "react";
 
 export interface User {
