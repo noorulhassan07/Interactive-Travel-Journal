@@ -1,35 +1,51 @@
-from fastapi import APIRouter, HTTPException
-from pymongo import MongoClient
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from app.db import get_database
+from app.utils.security import create_access_token, decode_access_token
 from typing import List, Dict
 
-client = MongoClient("mongodb://root:example@mongo:27017/")
-db = client["travel_journal_db"]
+router = APIRouter(prefix="/admin", tags=["Admin"])
 
-# The router must be named "router"
-router = APIRouter()
+ADMIN_EMAIL = "admin@gmail.com"
+ADMIN_PASSWORD = "admin@123"
 
-def admin_auth(username: str, password: str):
-    if username != "admin" or password != "admin@123":
-        raise HTTPException(status_code=401, detail="Unauthorized admin access")
+security = HTTPBearer()
+
+class AdminLoginSchema(BaseModel):
+    email: str
+    password: str
+
+async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    try:
+        payload = decode_access_token(token)
+        if payload.get("sub") != "admin":
+            raise HTTPException(status_code=403, detail="Not authorized")
+    except:
+        raise HTTPException(status_code=403, detail="Not authorized")
     return True
 
+@router.post("/login")
+async def admin_login(data: AdminLoginSchema):
+    if data.email != ADMIN_EMAIL or data.password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Invalid admin credentials")
+    
+    token = create_access_token(subject="admin")
+    return {"token": token}
+
 @router.get("/users", response_model=List[Dict])
-def get_all_users(username: str = "admin@gmail.com", password: str = "admin@123"):
-    admin_auth(username, password)
-
-    users_collection = db["users"]
-    badges_collection = db["badges"]
-
-    users = list(users_collection.find({}))
-
+async def get_all_users(admin: bool = Depends(get_current_admin)):
+    db = get_database()
+    users = await db["users"].find().to_list(length=None)
+    
     result = []
     for user in users:
-        badges_count = badges_collection.count_documents({"user_id": str(user["_id"])})
         result.append({
             "id": str(user["_id"]),
             "username": user.get("username"),
             "email": user.get("email"),
-            "password": user.get("password"),
-            "badges_count": badges_count
+            "travel_style": user.get("travel_style"),
+            "isAdmin": user.get("isAdmin", False)
         })
     return result
