@@ -1,3 +1,4 @@
+#backend/app/db.py
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
@@ -16,7 +17,7 @@ async def init_db(mongo_url: str = None):
     db.client = AsyncIOMotorClient(mongo_url)
     db.database = db.client.travel_journal_db
     await db.client.admin.command('ping')
-    print("✅ Connected to MongoDB successfully!")
+    print("Connected to MongoDB successfully!")
     return db.database
 
 def get_database():
