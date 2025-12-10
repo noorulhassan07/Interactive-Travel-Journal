@@ -1,4 +1,3 @@
-# backend/app/models/token_model.py
 from beanie import Document
 from pydantic import Field
 from datetime import datetime
