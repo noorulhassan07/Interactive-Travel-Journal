@@ -4,12 +4,14 @@ from app.models.user_model import User
 from app.models.trip_model import Trip
 from beanie import PydanticObjectId
 from fastapi import HTTPException, UploadFile
+from datetime import datetime
 
 UPLOAD_DIR = "static/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-async def save_media(file: UploadFile, user_id: str = None, trip_id: str = None):
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
+# Save media
+async def save_media(file: UploadFile, user_id: str = None, trip_id: str = None) -> Media:
+    file_path = os.path.join(UPLOAD_DIR, f"{datetime.utcnow().timestamp()}_{file.filename}")
     with open(file_path, "wb") as f:
         f.write(await file.read())
 
@@ -21,22 +23,26 @@ async def save_media(file: UploadFile, user_id: str = None, trip_id: str = None)
         content_type=file.content_type,
         url=file_path,
         owner=user,
-        uploaded_at=None
+        trip=trip,
+        uploaded_at=datetime.utcnow()
     )
     await media.insert()
     return media
 
-async def get_media_by_id(media_id: PydanticObjectId) -> Media:
-    media = await Media.get(media_id)
+# Get media by ID
+async def get_media_by_id(media_id: str) -> Media:
+    media = await Media.get(PydanticObjectId(media_id))
     if not media:
         raise HTTPException(status_code=404, detail="Media not found")
     return media
 
+# Get all media
 async def get_all_media() -> list[Media]:
     return await Media.find_all().to_list()
 
-async def delete_media(media_id: PydanticObjectId):
-    media = await Media.get(media_id)
+# Delete media
+async def delete_media(media_id: str):
+    media = await Media.get(PydanticObjectId(media_id))
     if not media:
         raise HTTPException(status_code=404, detail="Media not found")
     await media.delete()
