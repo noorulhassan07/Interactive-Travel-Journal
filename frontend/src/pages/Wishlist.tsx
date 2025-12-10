@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getUserWishlist } from '../services/api';
+import getUserWishlist from '../services/api';
 
 interface WishlistItem {
   id: string;
@@ -24,8 +24,8 @@ const Wishlist = () => {
 
     const loadWishlist = async () => {
       try {
-        const response = await getUserWishlist(currentUser.email);
-        setWishlist(response.data);
+        const { data } = await getUserWishlist(currentUser.email);
+        setWishlist(data);
       } catch (err) {
         console.error("Error fetching wishlist:", err);
       } finally {
@@ -76,9 +76,7 @@ const Wishlist = () => {
                 {item.notes && <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item.notes}</p>}
                 <div className="flex gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i} className={`text-lg ${i < item.priority ? 'text-[#f77f00]' : 'text-gray-300'}`}>
-                      ★
-                    </span>
+                    <span key={i} className={`text-lg ${i < item.priority ? 'text-[#f77f00]' : 'text-gray-300'}`}>★</span>
                   ))}
                 </div>
               </motion.div>
