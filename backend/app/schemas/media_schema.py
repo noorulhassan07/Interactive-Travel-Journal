@@ -1,7 +1,13 @@
-# backend/app/schemas/media_schema.py
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+
+class MediaCreate(BaseModel):
+    filename: str
+    content_type: Optional[str] = None
+    url: Optional[str] = None
+    owner_id: Optional[str] = None
+    description: Optional[str] = None
 
 class MediaOut(BaseModel):
     id: str
@@ -14,10 +20,3 @@ class MediaOut(BaseModel):
 
     class Config:
         orm_mode = True
-
-class MediaCreate(BaseModel):
-    filename: str
-    content_type: Optional[str] = None
-    url: Optional[str] = None
-    owner_id: Optional[str] = None
-    description: Optional[str] = None
