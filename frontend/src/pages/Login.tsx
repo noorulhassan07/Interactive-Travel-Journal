@@ -10,7 +10,6 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,13 +22,15 @@ const Login = () => {
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed. Check your credentials.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0077b6] via-[#1d3557] to-[#023e8a] relative overflow-hidden">
+      
+      {/* Floating icons */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 animate-float">
           <Globe size={80} className="text-white" />
@@ -79,8 +80,8 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0077b6] focus:outline-none transition-colors"
               placeholder="Enter your email"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0077b6] focus:outline-none transition-colors"
             />
           </div>
 
@@ -91,8 +92,8 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0077b6] focus:outline-none transition-colors"
               placeholder="Enter your password"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#0077b6] focus:outline-none transition-colors"
             />
           </div>
 
