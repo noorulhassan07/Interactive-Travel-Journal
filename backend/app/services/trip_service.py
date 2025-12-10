@@ -21,8 +21,8 @@ async def create_trip(trip_data: TripCreate, user_id: str) -> Trip:
     await trip.insert()
     return trip
 
-async def get_trip_by_id(trip_id: PydanticObjectId) -> Trip:
-    trip = await Trip.get(trip_id)
+async def get_trip_by_id(trip_id: str) -> Trip:
+    trip = await Trip.get(PydanticObjectId(trip_id))
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     return trip
@@ -30,8 +30,8 @@ async def get_trip_by_id(trip_id: PydanticObjectId) -> Trip:
 async def get_all_trips() -> List[Trip]:
     return await Trip.find_all().to_list()
 
-async def update_trip(trip_id: PydanticObjectId, updated_data: dict) -> Trip:
-    trip = await Trip.get(trip_id)
+async def update_trip(trip_id: str, updated_data: dict) -> Trip:
+    trip = await Trip.get(PydanticObjectId(trip_id))
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     for key, value in updated_data.items():
@@ -39,8 +39,8 @@ async def update_trip(trip_id: PydanticObjectId, updated_data: dict) -> Trip:
     await trip.save()
     return trip
 
-async def delete_trip(trip_id: PydanticObjectId):
-    trip = await Trip.get(trip_id)
+async def delete_trip(trip_id: str):
+    trip = await Trip.get(PydanticObjectId(trip_id))
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
     await trip.delete()
