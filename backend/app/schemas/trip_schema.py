@@ -1,4 +1,3 @@
-# backend/app/schemas/trip_schema.py
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
@@ -9,6 +8,7 @@ class TripCreate(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     location: Optional[str] = None
+    user_id: str
 
 class TripOut(BaseModel):
     id: str
